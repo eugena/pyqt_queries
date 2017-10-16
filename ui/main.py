@@ -11,10 +11,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_SQLQueries(object):
     def setupUi(self, SQLQueries):
         SQLQueries.setObjectName("SQLQueries")
-        SQLQueries.resize(590, 448)
+        SQLQueries.resize(590, 421)
         self.connString = QtWidgets.QLineEdit(SQLQueries)
         self.connString.setGeometry(QtCore.QRect(10, 10, 471, 21))
-        self.connString.setCursorPosition(0)
+        self.connString.setCursorPosition(8)
         self.connString.setObjectName("connString")
         self.query = QtWidgets.QPlainTextEdit(SQLQueries)
         self.query.setGeometry(QtCore.QRect(10, 40, 471, 131))
@@ -25,12 +25,6 @@ class Ui_SQLQueries(object):
         self.results = QtWidgets.QTableView(SQLQueries)
         self.results.setGeometry(QtCore.QRect(10, 180, 571, 231))
         self.results.setObjectName("results")
-        self.page = QtWidgets.QSpinBox(SQLQueries)
-        self.page.setGeometry(QtCore.QRect(530, 420, 48, 24))
-        self.page.setObjectName("page")
-        self.label = QtWidgets.QLabel(SQLQueries)
-        self.label.setGeometry(QtCore.QRect(490, 420, 41, 21))
-        self.label.setObjectName("label")
 
         self.retranslateUi(SQLQueries)
         QtCore.QMetaObject.connectSlotsByName(SQLQueries)
@@ -38,8 +32,8 @@ class Ui_SQLQueries(object):
     def retranslateUi(self, SQLQueries):
         _translate = QtCore.QCoreApplication.translate
         SQLQueries.setWindowTitle(_translate("SQLQueries", "SQL queries"))
+        self.connString.setText(_translate("SQLQueries", ":memory:"))
         self.connString.setPlaceholderText(_translate("SQLQueries", "sqlite3 connection string"))
         self.query.setPlaceholderText(_translate("SQLQueries", "Query"))
         self.execute.setText(_translate("SQLQueries", "Execute"))
-        self.label.setText(_translate("SQLQueries", "Page:"))
 

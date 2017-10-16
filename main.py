@@ -1,23 +1,51 @@
 #!/usr/bin/python3
 
-import re
 import sys
 import sqlite3
 
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtCore import Qt, pyqtSlot, QAbstractTableModel
 from PyQt5.QtWidgets import QApplication, QDialog, QMessageBox
 
 from ui.main import Ui_SQLQueries
 
 __appname__ = "SQL queries"
 
-# Memory limits
-__max_page_count__ = 195313
-__page_size__ = 512
 
-# Query limits
-QUERY_LIMIT = 100
+class TableModel(QAbstractTableModel):
+
+    def __init__(self, parent=None, *args):
+        QAbstractTableModel.__init__(self, parent)
+        self.list, self.header = args[:2]
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        """
+        rowCount(self, parent: QModelIndex = QModelIndex()) -> int
+        """
+        return len(self.list)
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        """
+        columnCount(self, parent: QModelIndex = QModelIndex()) -> int
+        """
+        return len(self.header)
+
+    def data(self, QModelIndex, role=None):
+        """
+        data(self, QModelIndex, role: int = Qt.DisplayRole) -> Any
+        """
+        if not QModelIndex.isValid():
+            return None
+        elif role != Qt.DisplayRole:
+            return None
+        return self.list[QModelIndex.row()][QModelIndex.column()]
+
+    def headerData(self, p_int, Qt_Orientation, role=None):
+        """
+        headerData(self, int, Qt.Orientation, role: int = Qt.DisplayRole) -> Any
+        """
+        if Qt_Orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self.header[p_int]
+        return None
 
 
 class MainWindow(QDialog, Ui_SQLQueries):
@@ -28,16 +56,11 @@ class MainWindow(QDialog, Ui_SQLQueries):
         super().__init__()
         self.setupUi(self)
 
-        self.connString.setText(":memory:")
-        self.conn = sqlite3.connect(self.connString.text())
-
-        self.page.setMinimum(1)
-        self.page.setMaximum(1)
+        self._conn_open()
 
         # setting of signals
         self.connString.editingFinished.connect(self.update_conn)
         self.execute.clicked.connect(self.execute_query)
-        self.page.valueChanged.connect(self.execute_query)
 
     @pyqtSlot()
     def update_conn(self):
@@ -47,7 +70,17 @@ class MainWindow(QDialog, Ui_SQLQueries):
         """
         if self.conn:
             self.conn.close()
-        self.conn = sqlite3.connect(self.connString.text())
+        self._conn_open()
+
+    def _conn_open(self):
+        """
+        Oppens a connection to a database
+        :return: void
+        """
+        try:
+            self.conn = sqlite3.connect(self.connString.text())
+        except sqlite3.OperationalError as e:
+            QMessageBox.critical(self, 'Operational Error', e.__str__())
 
     @pyqtSlot()
     def execute_query(self):
@@ -58,30 +91,16 @@ class MainWindow(QDialog, Ui_SQLQueries):
         try:
             self.conn.row_factory = sqlite3.Row
             cursor = self.conn.cursor()
-            cursor.execute("PRAGMA max_page_count = %s" % __max_page_count__)
-            cursor.execute("PRAGMA page_size = %s" % __page_size__)
             if not len(self.query.toPlainText()):
                 raise sqlite3.OperationalError ("Can\'t execute empty query")
-            model = QStandardItemModel()
-            self.results.setModel(model)
-            cursor.execute(self._query_decorator())
-            self._update_page()
-            row = cursor.fetchone()
-            if isinstance(row, sqlite3.Row):
-                if not model.columnCount():
-                    model.setColumnCount(len(row.keys()))
-                    model.setHorizontalHeaderLabels(row.keys())
-                while row:
-                    r = list()
-                    for name in row:
-                        item = QStandardItem(name.__str__())
-                        item.setEditable(False)
-                        r.append(item)
-                    model.appendRow(r)
-                    row = cursor.fetchone()
+
+            cursor.execute(self.query.toPlainText())
+            if cursor.description:
+                model = TableModel(
+                    None,
+                    cursor.fetchall(),
+                    [c[0] for c in cursor.description])
                 self.results.setModel(model)
-            else:
-                self.conn.commit()
         except sqlite3.OperationalError as e:
             QMessageBox.critical(self, 'Operational Error', '%s. %s' % (
                 e.__str__(),
@@ -100,39 +119,6 @@ class MainWindow(QDialog, Ui_SQLQueries):
         """
         super().closeEvent(QCloseEvent)
         self.conn.close()
-
-    @staticmethod
-    def _select_checker(query):
-        return re.match(r'^select', query, flags=re.I)
-
-    def _update_page(self):
-        """
-        Calculating quantity of rows in a table and setting a page number
-        :return:
-        """
-        query = self.query.toPlainText()
-        if MainWindow._select_checker(query):
-            query = re.sub(r'^select .*(?=from)', 'select count(*) ',  query, flags=re.I)
-            try:
-                cursor = self.conn.cursor()
-                cursor.execute(query)
-                row_count = cursor.fetchone()[0]
-                self.page.setMaximum(int(row_count / QUERY_LIMIT))
-            except (sqlite3.OperationalError, TypeError):
-                self.page.setMaximum(1)
-
-    def _query_decorator(self):
-        """
-        Decorating of a SELECT query
-        :return:
-        """
-        query = self.query.toPlainText()
-        if MainWindow._select_checker(query):
-            query = re.sub(r'limit.*', '', query, flags=re.I)
-            query += ' LIMIT %s OFFSET %s' % (
-                QUERY_LIMIT,
-                (self.page.value() - 1) * QUERY_LIMIT)
-        return query
 
 
 if __name__ == '__main__':

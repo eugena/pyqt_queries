@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>590</width>
-    <height>448</height>
+    <height>421</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,11 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="text">
+    <string>:memory:</string>
+   </property>
    <property name="cursorPosition">
-    <number>0</number>
+    <number>8</number>
    </property>
    <property name="placeholderText">
     <string>sqlite3 connection string</string>
@@ -63,29 +66,6 @@
      <width>571</width>
      <height>231</height>
     </rect>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="page">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>420</y>
-     <width>48</width>
-     <height>24</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>490</x>
-     <y>420</y>
-     <width>41</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Page:</string>
    </property>
   </widget>
  </widget>
