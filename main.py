@@ -17,7 +17,7 @@ __max_page_count__ = 195313
 __page_size__ = 512
 
 # Query limits
-QUERY_LIMIT = 1
+QUERY_LIMIT = 100
 
 
 class MainWindow(QDialog, Ui_SQLQueries):
