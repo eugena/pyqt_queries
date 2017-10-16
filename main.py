@@ -13,7 +13,7 @@ __appname__ = "SQL queries"
 
 class TableModel(QAbstractTableModel):
 
-    __slots__ = ['cursor', 'list', 'header', 'next_row']
+    __slots__ = ('cursor', 'list', 'header', 'next_row', )
 
     def __init__(self, parent=None, *args):
         QAbstractTableModel.__init__(self, parent)
