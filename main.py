@@ -123,7 +123,7 @@ class MainWindow(QDialog, Ui_SQLQueries):
 
     def _query_decorator(self):
         """
-        Decorating a SELECT query
+        Decorating of a SELECT query
         :return:
         """
         query = self.query.toPlainText()
