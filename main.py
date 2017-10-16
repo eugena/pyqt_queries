@@ -101,7 +101,7 @@ class MainWindow(QDialog, Ui_SQLQueries):
 
     def _conn_open(self):
         """
-        Oppens a connection to a database
+        Opens a connection to a database
         :return: void
         """
         try:
