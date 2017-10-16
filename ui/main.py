@@ -23,8 +23,14 @@ class Ui_SQLQueries(object):
         self.execute.setGeometry(QtCore.QRect(480, 90, 111, 32))
         self.execute.setObjectName("execute")
         self.results = QtWidgets.QTableView(SQLQueries)
-        self.results.setGeometry(QtCore.QRect(10, 180, 571, 261))
+        self.results.setGeometry(QtCore.QRect(10, 180, 571, 231))
         self.results.setObjectName("results")
+        self.page = QtWidgets.QSpinBox(SQLQueries)
+        self.page.setGeometry(QtCore.QRect(530, 420, 48, 24))
+        self.page.setObjectName("page")
+        self.label = QtWidgets.QLabel(SQLQueries)
+        self.label.setGeometry(QtCore.QRect(490, 420, 41, 21))
+        self.label.setObjectName("label")
 
         self.retranslateUi(SQLQueries)
         QtCore.QMetaObject.connectSlotsByName(SQLQueries)
@@ -35,4 +41,5 @@ class Ui_SQLQueries(object):
         self.connString.setPlaceholderText(_translate("SQLQueries", "sqlite3 connection string"))
         self.query.setPlaceholderText(_translate("SQLQueries", "Query"))
         self.execute.setText(_translate("SQLQueries", "Execute"))
+        self.label.setText(_translate("SQLQueries", "Page:"))
 
