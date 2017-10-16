@@ -13,9 +13,35 @@ __appname__ = "SQL queries"
 
 class TableModel(QAbstractTableModel):
 
+    __slots__ = ['cursor', 'list', 'header', 'next_row']
+
     def __init__(self, parent=None, *args):
         QAbstractTableModel.__init__(self, parent)
-        self.list, self.header = args[:2]
+
+        self.cursor = args[0]
+        self.list = list()
+        self.header = [c[0] for c in args[0].description]
+
+        self.next_row = None
+
+    def fetchMore(self, QModelIndex):
+        """
+        fetchMore (self, QModelIndex)
+        """
+        if QModelIndex.isValid():
+            return
+        self.beginInsertRows(QModelIndex, self.rowCount(), self.rowCount())
+        self.list.append(self.next_row)
+        self.endInsertRows()
+
+    def canFetchMore(self, QModelIndex):
+        """
+        canFetchMore (self, QModelIndex) -> bool
+        """
+        if QModelIndex.isValid():
+            return
+        self.next_row = self.cursor.fetchone()
+        return self.next_row is not None
 
     def rowCount(self, parent=None, *args, **kwargs):
         """
@@ -35,9 +61,10 @@ class TableModel(QAbstractTableModel):
         """
         if not QModelIndex.isValid():
             return None
-        elif role != Qt.DisplayRole:
+        if role != Qt.DisplayRole:
             return None
-        return self.list[QModelIndex.row()][QModelIndex.column()]
+        else:
+            return self.list[QModelIndex.row()][QModelIndex.column()]
 
     def headerData(self, p_int, Qt_Orientation, role=None):
         """
@@ -96,10 +123,7 @@ class MainWindow(QDialog, Ui_SQLQueries):
 
             cursor.execute(self.query.toPlainText())
             if cursor.description:
-                model = TableModel(
-                    None,
-                    cursor.fetchall(),
-                    [c[0] for c in cursor.description])
+                model = TableModel(None, cursor)
                 self.results.setModel(model)
         except sqlite3.OperationalError as e:
             QMessageBox.critical(self, 'Operational Error', '%s. %s' % (
